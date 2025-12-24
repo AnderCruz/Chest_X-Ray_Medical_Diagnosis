@@ -36,7 +36,7 @@ def download_file_from_google_drive(file_id, destination):
     URL = "https://docs.google.com/uc?export=download"
     session = requests.Session()
     response = session.get(URL, params={'id': file_id}, stream=True)
-    
+
     token = None
     for key, value in response.cookies.items():
         if key.startswith('download_warning'):
@@ -47,26 +47,35 @@ def download_file_from_google_drive(file_id, destination):
         response = session.get(URL, params=params, stream=True)
 
     CHUNK_SIZE = 32768
+    total_written = 0
     with open(destination, "wb") as f:
         for chunk in response.iter_content(CHUNK_SIZE):
             if chunk:
                 f.write(chunk)
+                total_written += len(chunk)
+
+    if total_written < 1024:
+        raise ValueError("❌ Download do modelo falhou: arquivo muito pequeno. Verifique o Google Drive.")
+
+# ===============================
+# FUNÇÃO PARA GARANTIR O DOWNLOAD
+# ===============================
+def ensure_model():
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("🔄 Baixando modelo clínico..."):
+            download_file_from_google_drive(MODEL_ID, MODEL_PATH)
 
 # ===============================
 # FUNÇÃO DE LOAD DO MODELO
 # ===============================
 @st.cache_resource
 def load_model():
-    if not os.path.exists(MODEL_PATH):
-        with st.spinner("🔄 Baixando modelo clínico..."):
-            download_file_from_google_drive(MODEL_ID, MODEL_PATH)
+    return tf.keras.models.load_model(MODEL_PATH, compile=False)
 
-    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
-    return model
-
-# ==============================
-# CARREGAR O MODELO
-# ==============================
+# ===============================
+# GARANTIR QUE O MODELO EXISTE
+# ===============================
+ensure_model()
 model = load_model()
 
 # ===============================
