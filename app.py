@@ -46,6 +46,11 @@ def load_model():
     return model
 
 # ===============================
+# EXECUTAR LOAD DO MODELO
+# ===============================
+model = load_model()
+
+# ===============================
 # PARÂMETROS CLÍNICOS
 # ===============================
 st.sidebar.header("⚙️ Configurações Clínicas")
