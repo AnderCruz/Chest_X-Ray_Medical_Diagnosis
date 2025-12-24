@@ -64,9 +64,9 @@ def load_model():
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
     return model
 
-# ===============================
+# ==============================
 # CARREGAR O MODELO
-# ===============================
+# ==============================
 model = load_model()
 
 # ===============================
