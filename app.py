@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import tempfile
 import os
+import requests
 
 from inference import hospital_inference
 from logger import log_inference
