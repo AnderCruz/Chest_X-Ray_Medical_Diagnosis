@@ -23,9 +23,9 @@ st.markdown("""
 Este sistema é um *apoio à decisão médica* e **não substitui avaliação clínica**.
 """)
 
-# ===============================
+# ==============================
 # CARREGAMENTO DO ARQUIVO
-# ===============================
+# ==============================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "best_model_clinical.keras")
