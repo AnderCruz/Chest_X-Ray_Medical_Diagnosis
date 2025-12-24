@@ -24,12 +24,12 @@ Este sistema é um *apoio à decisão médica* e **não substitui avaliação cl
 """)
 
 # ===============================
-# CARREGAMENTO DO MODELO (CACHE)
+# CARREGAMENTO DO ARQUIVO
 # ===============================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "best_model_clinical.keras")
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"
+MODEL_URL = "https://drive.google.com/file/d/1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"
 
 @st.cache_resource
 def load_model():
@@ -37,18 +37,13 @@ def load_model():
         with st.spinner("🔄 Baixando modelo clínico..."):
             r = requests.get(MODEL_URL, stream=True)
             r.raise_for_status()
-
             with open(MODEL_PATH, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
+                    if chunk:
+                        f.write(chunk)
 
-    model = tf.keras.models.load_model(
-        MODEL_PATH,
-        compile=False
-    )
+    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
     return model
-
-model = load_model()
 
 # ===============================
 # PARÂMETROS CLÍNICOS
