@@ -17,36 +17,55 @@ st.set_page_config(
 )
 
 st.title("🩺 Sistema de Apoio ao Diagnóstico — Pneumonia")
-
 st.markdown("""
 ⚠️ **Aviso Clínico**  
 Este sistema é um *apoio à decisão médica* e **não substitui avaliação clínica**.
 """)
 
-# ==============================
-# CARREGAMENTO DO ARQUIVO
-# ==============================
-
+# ===============================
+# CAMINHO DO MODELO
+# ===============================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "best_model_clinical.keras")
-MODEL_URL = "https://drive.google.com/file/d/1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"
+MODEL_ID = "1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"  # ID do Google Drive
 
+# ===============================
+# FUNÇÃO DE DOWNLOAD SEGURO
+# ===============================
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    
+    token = None
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+# ===============================
+# FUNÇÃO DE LOAD DO MODELO
+# ===============================
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
         with st.spinner("🔄 Baixando modelo clínico..."):
-            r = requests.get(MODEL_URL, stream=True)
-            r.raise_for_status()
-            with open(MODEL_PATH, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
+            download_file_from_google_drive(MODEL_ID, MODEL_PATH)
 
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
     return model
 
 # ===============================
-# EXECUTAR LOAD DO MODELO
+# CARREGAR O MODELO
 # ===============================
 model = load_model()
 
@@ -54,7 +73,6 @@ model = load_model()
 # PARÂMETROS CLÍNICOS
 # ===============================
 st.sidebar.header("⚙️ Configurações Clínicas")
-
 threshold = st.sidebar.slider(
     "Threshold clínico (sensibilidade ↑)",
     min_value=0.80,
@@ -62,7 +80,6 @@ threshold = st.sidebar.slider(
     value=0.97,
     step=0.01
 )
-
 model_version = "1.0.0"
 
 # ===============================
@@ -100,7 +117,6 @@ if uploaded_file is not None:
         # RESULTADO CLÍNICO
         # ===============================
         st.subheader("📊 Resultado da Análise")
-
         if result["prediction_label"] == 1:
             st.error("🟥 **PNEUMONIA DETECTADA**")
         else:
