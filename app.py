@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 import tempfile
 import os
-import requests
+import gdown
 
 from inference import hospital_inference
 from logger import log_inference
@@ -30,40 +30,15 @@ MODEL_PATH = os.path.join(BASE_DIR, "best_model_clinical.keras")
 MODEL_ID = "1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"  # ID do Google Drive
 
 # ===============================
-# FUNÇÃO DE DOWNLOAD SEGURO
-# ===============================
-def download_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
-    response = session.get(URL, params={'id': file_id}, stream=True)
-
-    token = None
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            token = value
-
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-
-    CHUNK_SIZE = 32768
-    total_written = 0
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:
-                f.write(chunk)
-                total_written += len(chunk)
-
-    if total_written < 1024:
-        raise ValueError("❌ Download do modelo falhou: arquivo muito pequeno. Verifique o Google Drive.")
-
-# ===============================
 # FUNÇÃO PARA GARANTIR O DOWNLOAD
 # ===============================
 def ensure_model():
-    if not os.path.exists(MODEL_PATH):
-        with st.spinner("🔄 Baixando modelo clínico..."):
-            download_file_from_google_drive(MODEL_ID, MODEL_PATH)
+    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 1024:
+        with st.spinner("🔄 Baixando modelo clínico do Google Drive..."):
+            url = f"https://drive.google.com/uc?id={MODEL_ID}"
+            gdown.download(url, MODEL_PATH, quiet=False)
+        if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 1024:
+            raise ValueError("❌ Falha ao baixar o modelo do Google Drive. Verifique o ID e o acesso.")
 
 # ===============================
 # FUNÇÃO DE LOAD DO MODELO

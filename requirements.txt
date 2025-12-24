@@ -4,3 +4,4 @@ numpy
 opencv-python
 python-multipart
 requests
+gdown
