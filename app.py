@@ -16,7 +16,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🩺 Sistema de Apoio ao Diagnóstico — Pneumonia")
+st.title("🩺 Diagnostic Decision Support System — Pneumonia")
 st.markdown("""
 ⚠️ **Aviso Clínico**  
 Este sistema é um *apoio à decisão médica* e **não substitui avaliação clínica**.
