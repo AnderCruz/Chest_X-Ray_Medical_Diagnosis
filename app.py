@@ -17,20 +17,21 @@ st.set_page_config(
 )
 
 st.title("🩺 Sistema de Apoio ao Diagnóstico — Pneumonia")
-
 st.markdown("""
 ⚠️ **Aviso Clínico**  
 Este sistema é um *apoio à decisão médica* e **não substitui avaliação clínica**.
 """)
 
 # ===============================
-# CARREGAMENTO DO ARQUIVO
+# CAMINHO DO MODELO
 # ===============================
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "best_model_clinical.keras")
-MODEL_URL = "https://drive.google.com/file/d/1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1R3rX15h_ARpFk-EPzuUrNGlzISJ9Vqy_"
 
+# ===============================
+# FUNÇÃO DE LOAD DO MODELO
+# ===============================
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
@@ -44,6 +45,11 @@ def load_model():
 
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
     return model
+
+# ===============================
+# EXECUTAR LOAD DO MODELO
+# ===============================
+model = load_model()
 
 # ===============================
 # PARÂMETROS CLÍNICOS
@@ -95,7 +101,6 @@ if uploaded_file is not None:
         # RESULTADO CLÍNICO
         # ===============================
         st.subheader("📊 Resultado da Análise")
-
         if result["prediction_label"] == 1:
             st.error("🟥 **PNEUMONIA DETECTADA**")
         else:
@@ -116,4 +121,10 @@ if uploaded_file is not None:
 
         st.expander("📄 Detalhes técnicos").json(result)
 
-
+# ===============================
+# FUTURO: GRAD-CAM (opcional)
+# ===============================
+# Aqui você pode adicionar função Grad-CAM para explicabilidade médica
+# Exemplo:
+# grad_cam_image = generate_grad_cam(model, tmp_path)
+# st.image(grad_cam_image, caption="Grad-CAM")
